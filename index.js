@@ -173,6 +173,14 @@ async function run() {
         res.send(reviews);
       });
 
+      // GET API for payment
+      app.get("/orders/:id", async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+        const order = await ordersCollection.findOne(query);
+        res.json(order);
+      });
+
       // DELETE API
       app.delete("/orders/:id", async (req, res) => {
         const id = req.params.id;
