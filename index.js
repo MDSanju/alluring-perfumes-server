@@ -36,8 +36,20 @@ async function run() {
       // GET API
       app.get("/perfumes", async (req, res) => {
         const cursor = perfumesCollection.find({});
-        const perfumes = await cursor.toArray();
-        res.send(perfumes);
+        const pageData = req.query.page;
+        const dataSize = parseInt(req.query.size);
+        console.log(pageData * dataSize);
+        let perfumes;
+        const count = await cursor.count();
+        if (pageData) {
+          perfumes = await cursor
+            .skip(pageData * dataSize)
+            .limit(dataSize)
+            .toArray();
+        } else {
+          perfumes = await cursor.toArray();
+        }
+        res.send({ count, perfumes });
       });
 
       // GET API by id
@@ -130,6 +142,23 @@ async function run() {
       // GET API by user's email id
       app.get("/orders/:email", async (req, res) => {
         const cursor = ordersCollection.find({ email: req.params.email });
+        const page = req.query.page;
+        const size = parseInt(req.query.size);
+        let orders;
+        const count = await cursor.count();
+        if (page) {
+          orders = await cursor
+            .skip(page * size)
+            .limit(size)
+            .toArray();
+        } else {
+          orders = await cursor.toArray();
+        }
+        res.send({ count, orders });
+      });
+
+      app.get("/orders/totalOrders/:email", async (req, res) => {
+        const cursor = ordersCollection.find({ email: req.params.email });
         const orders = await cursor.toArray();
         res.send(orders);
       });
@@ -139,6 +168,14 @@ async function run() {
         const cursor = ordersCollection.find({});
         const orders = await cursor.toArray();
         res.send(orders);
+      });
+
+      // GET API for payment
+      app.get("/orders/:id", async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+        const order = await ordersCollection.findOne(query);
+        res.json(order);
       });
 
       // UPDATE API(put)
@@ -171,14 +208,6 @@ async function run() {
         const cursor = reviewsCollection.find({});
         const reviews = await cursor.toArray();
         res.send(reviews);
-      });
-
-      // GET API for payment
-      app.get("/orders/:id", async (req, res) => {
-        const id = req.params.id;
-        const query = { _id: ObjectId(id) };
-        const order = await ordersCollection.findOne(query);
-        res.json(order);
       });
 
       // DELETE API
