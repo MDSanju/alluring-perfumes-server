@@ -161,6 +161,24 @@ async function run() {
     // GET API
     app.get("/orders", async (req, res) => {
       const cursor = ordersCollection.find({});
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      let orders;
+      const count = await cursor.count();
+      if (page) {
+        orders = await cursor
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+      } else {
+        orders = await cursor.toArray();
+      }
+      res.send({ count, orders });
+    });
+
+    // GET API
+    app.get("/allOrders", async (req, res) => {
+      const cursor = ordersCollection.find({});
       const orders = await cursor.toArray();
       res.send(orders);
     });
