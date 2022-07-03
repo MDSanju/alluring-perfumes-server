@@ -4,13 +4,15 @@ const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config();
 const cors = require('cors');
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
+const fileUpload = require("express-fileupload");
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware
+// Middlewares
 app.use(cors());
 app.use(express.json());
+app.use(fileUpload());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.5gvym.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -31,7 +33,14 @@ async function run() {
 
     // POST API
     app.post("/perfumes", async (req, res) => {
-      const perfume = req.body;
+      const name = req.body.name;
+      const price = req.body.price;
+      const description = req.body.description;
+      const pic = req.files.img;
+      const imgData = pic.data;
+      const encodedImg = imgData.toString("base64");
+      const imgBuffer = Buffer.from(encodedImg, "base64");
+      const perfume = { name, price, description, img: imgBuffer };
       const result = await perfumesCollection.insertOne(perfume);
       res.json(result);
     });
