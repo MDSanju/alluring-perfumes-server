@@ -45,6 +45,13 @@ async function run() {
       res.json(result);
     });
 
+    // GET All Perfumes
+    app.get("/allPerfumes", async (req, res) => {
+      const cursor = perfumesCollection.find({});
+      const perfumes = await cursor.toArray();
+      res.send(perfumes);
+    });
+
     // GET API
     app.get("/perfumes", async (req, res) => {
       const cursor = perfumesCollection.find({});
