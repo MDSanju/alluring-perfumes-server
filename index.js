@@ -42,6 +42,7 @@ async function run() {
       const imgBuffer = Buffer.from(encodedImg, "base64");
       const perfume = { name, price, description, img: imgBuffer };
       const result = await perfumesCollection.insertOne(perfume);
+      console.log(result);
       res.json(result);
     });
 
